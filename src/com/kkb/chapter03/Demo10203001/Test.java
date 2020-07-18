@@ -1,109 +1,79 @@
 package com.kkb.chapter03.Demo10203001;
 
+import com.kkb.chapter03.Demo10203001.utils.DeliveryException;
+
 import java.util.Scanner;
 
+/**
+ * @Description: 快递管理系统界面
+ * @Author: Du Junnan
+ * @Date: Created in 17:44 2020/7/18
+ * @Modified by:
+ */
 public class Test {
+
     public static void main(String[] args) {
-        //定义红球池
-        int[] redPool = new int[33];
-        //添加红球数字
-        for (int i = 0; i < redPool.length; i++) {
-            redPool[i] = i + 1;
-        }
-        //定义篮球池
-        int[] bluePool=new int[16];
-        for (int j = 0; j < bluePool.length; j++) {
-            bluePool[j] = j + 1;
-        }
-        //定义被选中的红球数组
-        int[] redBalls = new int[6];
-        int x;
-        A: for (int i = 0; i < redBalls.length; i++) {
-            x = redPool[(int)(Math.random()*33)];
-            for (int j = 0; j <= i; j++) {
-                //去重
-                //判断当前循环取出的红球是否跟前几次取出的一样
-                //如果一样 大循环A向后退一次，重新取出红球
-                if (redBalls[j] == x) {
-                    i--;
-                    continue A;
-                }
-            }
-            //如果不一样，则把取出的红球池中取出的红球放入红球数组中
-
-            redBalls[i] = x;
-        }
-        //取出篮球
-        int blueBalls = bluePool[(int)(Math.random()*16)];
-        //利用冒泡排序对红球进行排序
-        int temp;
-        for (int i = 0; i < redBalls.length-1; i++) {
-            for (int j = 0; j < redBalls.length-i-1; j++) {
-                if (redBalls[j]>redBalls[j+1]) {
-                    temp=redBalls[j+1];
-                    redBalls[j+1]=redBalls[j];
-                    redBalls[j]=temp;
-                }
-            }
-        }
-        System.out.println("开奖号码：");
-        System.out.print("红球为：");
-        for(int i=0;i<redBalls.length;i++){
-            System.out.print(redBalls[i]+" ");
-        }
-        System.out.println("蓝球为：" +blueBalls);
-
-        System.out.println("请输入您购买的红球");
-        int[] redBuy = new int[6];
+        Cabinet cabinet = new Cabinet();
+        System.out.println("欢迎使用快递管理系统");
+        System.out.println("请输入您的身份：（管理员：1，用户：2）");
         Scanner input = new Scanner(System.in);
-        for(int i=0;i<redBuy.length;i++){
-            redBuy[i] = input.nextInt();
-        }
-
-        /*System.out.println("您购买的红球");
-        for(int i = 0; i < redBuy.length; i++){
-            System.out.print(redBuy[i]+" ");
-        }*/
-        boolean go =true;
-        System.out.println("请输入您购买的蓝球(1-16)任选");
-        int blueBuy = input.nextInt();
-
-        int count=0;
-        for(int i=0;i<redBuy.length;i++){
-            for(int j=0;j<redBuy.length;j++){
-                if(redBuy[j]==redBalls[i]){
-                    count++;
+        int operator;
+        if(input.hasNextInt()) {
+            int temp = input.nextInt();
+            if(temp == 1) {
+                operator = 1;
+                System.out.println("欢迎您，管理员，请选择您的操作：");
+                while(true) {
+                    System.out.println("1.快递录入");
+                    System.out.println("2.删除快递(根据单号)");
+                    System.out.println("3.修改快递(根据单号)");
+                    System.out.println("4.查看当前已存的快递");
+                    if (input.hasNextInt()) {
+                        int option = input.nextInt();
+                        menu(operator, option, cabinet);
+                    } else {
+                        System.out.println("请输入菜单中的操作序号");
+                    }
                 }
+            } else if(temp == 2) {
+                operator = 2;
+                System.out.println("请输入取货码：");
+                if(input.hasNext()) {
+                    String pickID = input.next();
+                    Delivery deli = cabinet.remove(operator, pickID);
+                    System.out.println(deli.toString());
+                }
+            } else {
+                throw new DeliveryException("用户身份有误，请重新输入");
             }
+        } else {
+            throw new DeliveryException("用户身份有误，请重新输入");
         }
-        if(blueBuy==blueBalls){
-            if(count==6){
-                System.out.println("恭喜您中了1等奖");
-            }else if(count==5){
-                System.out.println("恭喜您中了3等奖");
-            }else if (count==4){
-                System.out.println("恭喜您中了4等奖");
-            }else if (count==3){
-                System.out.println("恭喜您中了5等奖");
-            }else if (count==2){
-                System.out.println("恭喜您中了6等奖");
-            }else if (count==1){
-                System.out.println("恭喜您中了6等奖");
-            }else {
-                System.out.println("恭喜您中了6等奖");
-            }
-        }else {
-            if(count==6){
-                System.out.println("恭喜您中了2等奖");
-            }else if(count==5){
-                System.out.println("恭喜您中了4等奖");
-            }else if (count==4){
-                System.out.println("恭喜您中了5等奖");
-            }else {
-                System.out.println("很遗憾，欢迎您再来。。。");
-            }
-        }
-
 
     }
+
+    public static void menu(int o, int option, Cabinet cabinet) {
+        System.out.println("--------------------------------------------");
+        Scanner input = new Scanner(System.in);
+        switch(option) {
+            case 1://新增
+                break;
+            case 2://删除
+                break;
+            case 3://修改
+                System.out.println("请输入修改的单号");
+                String trackNum = input.next();
+                System.out.println("请输入修改的快递公司:");
+                String company= input.next();
+                Delivery deli = new Delivery(trackNum, company);
+                cabinet.update(deli);
+                break;
+            case 4://查看
+                cabinet.findAll(o);
+                break;
+            default:
+                System.out.println("请输入上述操作的正确编号");
+        }
+    }
+
 }

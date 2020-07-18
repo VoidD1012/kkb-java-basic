@@ -71,4 +71,13 @@ public class Delivery {
     public void setY(int y) {
         this.y = y;
     }
+
+    @Override
+    public String toString() {
+        return "快递信息{" +
+                "快递公司='" + expressCompany + '\'' +
+                ", 快递单号='" + trackingNumber + '\'' +
+                ", 快递保存在【 " + x + "，" + y + " 】" +
+                '}';
+    }
 }
