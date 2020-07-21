@@ -19,6 +19,9 @@ public class Delivery {
     private int x;
     private int y;
 
+    public Delivery() {
+    }
+
     public Delivery(String expressCompany, String trackingNumber) {
         this.expressCompany = expressCompany;
         this.trackingNumber = trackingNumber;
@@ -75,8 +78,8 @@ public class Delivery {
     @Override
     public String toString() {
         return "快递信息{" +
-                "快递公司='" + expressCompany + '\'' +
-                ", 快递单号='" + trackingNumber + '\'' +
+                "快递公司='" + this.getExpressCompany() + '\'' +
+                ", 快递单号='" + this.getTrackingNumber() + '\'' +
                 ", 快递保存在【 " + x + "，" + y + " 】" +
                 '}';
     }

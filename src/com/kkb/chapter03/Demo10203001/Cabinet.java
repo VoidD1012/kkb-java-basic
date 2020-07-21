@@ -37,23 +37,26 @@ public class Cabinet {
         size = DEFAULT_X_SIZE * DEFAULT_Y_SIZE;
     }
 
+    public static int getInUsing() {
+        return inUsing;
+    }
+
     //生成随机柜子序号,去重
     private int[] randomPoint() {
         int[] point = new int[2];
         do {
-            point[0] = (int)(Math.random() * cabinet.length + 1);
-            point[1] = (int)(Math.random() * cabinet[0].length + 1);
+            point[0] = (int)(Math.random() * (cabinet.length-1) + 1);
+            point[1] = (int)(Math.random() * (cabinet[0].length-1) + 1);
         } while(isUsing(point[0], point[1]));
         return point;
     }
 
     //生成随机取货码,未去重
     private String randomNum() {
-        int[] nums = new int[6];
-        for(int i = 0; i < nums.length; i++) {
-            nums[i] = (int)((Math.random() * 10) + 1);
+        StringBuffer nums = new StringBuffer();
+        for(int i = 0; i < 6; i++) {
+            nums.append((int)((Math.random() * 9) + 1));
         }
-
         return nums.toString();
     }
 
@@ -67,8 +70,26 @@ public class Cabinet {
         return inUsing == size ? true : false;
     }
 
-    //存入柜子,返回取货码
-    public String add(Delivery delivery) {
+    //通过快递单号查询该快递是否在柜子中
+    public Delivery findDeliveryByTrackingNumber(String trackingNumber) {
+        if(this.size <= 0) {
+            return null;
+        }
+        for(int i = 0; i < cabinet.length; i++) {
+            for(int j = 0; j < cabinet[i].length; j++) {
+                if(cabinet[i][j] != null) {
+                    Delivery temp = cabinet[i][j];
+                    if(temp.getTrackingNumber().equals(trackingNumber)) {
+                        return temp;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    //存入柜子,返回快递信息
+    public Delivery add(Delivery delivery) {
         if(isFull()) {
             throw new OutOfSizeDeliveryException();
         }
@@ -84,32 +105,28 @@ public class Cabinet {
             num = randomNum();
         }
         map.put(num, point);
+        this.inUsing++;
         //保存随机码
-        delivery.setPickID(num);
-        return num;
+        cabinet[point[0]][point[1]].setPickID(num);
+        return cabinet[point[0]][point[1]];
     }
 
     //取出快递
-    public Delivery remove(int operator, String trackingNumber) {
+    public Delivery remove(int operator, Delivery delivery) {
         Delivery deli = null;
         //管理员：通过单号删除
         if(operator == 1) {
-            for(int i = 0; i < cabinet.length; i++) {
-                for(int j = 0; j < cabinet[i].length; j++) {
-                    if(trackingNumber.equals(cabinet[i][j])) {
-                        deli = cabinet[i][j];
-                        cabinet[i][j] = null;
-                        //从map中删除取货码
-                        map.remove(cabinet[i][j].getPickID());
-                    }
-                }
-            }
+            cabinet[delivery.getX()][delivery.getY()] = null;
+            deli = delivery;
+            inUsing--;
         } else if(operator == 2) { //通过取货码删除
+            String trackingNumber = delivery.getPickID();
             if(null != map.get(trackingNumber)) {
                 int[] point = map.get(trackingNumber);
                 deli = cabinet[point[0]][point[1]];
                 cabinet[point[0]][point[1]] = null;
                 map.remove(trackingNumber);
+                inUsing--;
             } else {
                 throw new DeliveryException("请确认取货码是否正确");
             }
@@ -122,20 +139,9 @@ public class Cabinet {
 
     //修改快递信息,通过单号
     public void update(Delivery delivery) {
-        int update = 0;
         if(delivery.getOperator() == 1) {
-            A:
-            for(int i = 0; i < cabinet.length; i++) {
-                for(int j = 0; j < cabinet[i].length; j++) {
-                    if(delivery.getTrackingNumber().equals(cabinet[i][j])) {
-                        cabinet[i][j] = delivery;
-                        update = 1;
-                        break A;
-                    }
-                }
-            }
-            if(update == 0) {
-                throw new DeliveryException("根据单号无法查找到快递，请检查");
+            if(delivery.getX() != 0 && delivery.getY() != 0) {
+                cabinet[delivery.getX()][delivery.getY()] = delivery;
             }
         } else {
             throw new DeliveryException("只有管理员才能进行操作");
@@ -147,11 +153,13 @@ public class Cabinet {
         if(operator != 1) {
             throw new DeliveryException("只有管理员才能进行操作");
         }
+        if(this.inUsing <= 0) {
+            System.out.println("当前柜中无快递");
+        }
         for(int i = 0; i < cabinet.length; i++) {
             for(int j = 0; j < cabinet[i].length; j++) {
                 if(cabinet[i][j] != null) {
-                    cabinet[i][j].toString();
-                    System.out.println();
+                    System.out.println(cabinet[i][j].toString());
                 }
             }
         }
